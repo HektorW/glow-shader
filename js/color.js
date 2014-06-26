@@ -67,7 +67,7 @@ define([], function() {
 
     getArray: function(colorname) {
       var rgb = rgbValues(this[colorname]);
-      return new Uint16Array([parseInt(rgb.r, 16), parseInt(rgb.g, 16), parseInt(rgb.b, 16)]);
+      return new Float32Array([parseInt(rgb.r, 16) / 255.0, parseInt(rgb.g, 16) / 255.0, parseInt(rgb.b, 16) / 255.0]);
     },
 
     darken: function(color, val) {
