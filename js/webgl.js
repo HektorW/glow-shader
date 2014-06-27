@@ -197,6 +197,11 @@ define(['jquery'], function($) {
 			gl.bindTexture(gl.TEXTURE_2D, texture);
 			gl.uniform1i(uniformPointer, index);
 		},
+
+		bindFramebuffer: function(framebuffer) {
+			gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+		},
+
 		drawIndexed: function(num_items) {
 			gl.drawElements(gl.TRIANGLES, num_items, gl.UNSIGNED_SHORT, 0);
 		},

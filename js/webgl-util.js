@@ -13,6 +13,10 @@ define(['glmatrix'], function(glMatrix) {
 			this.initRectangleBuffer();
 		},
 
+		resize: function() {
+			this.resolution = vec2.fromValues(this.WebGL.screenWidth, this.WebGL.screenHeight);
+		},
+
 		initRectangleBuffer: function() {
 			if (this._rectangle) {
 				return;
@@ -77,6 +81,46 @@ define(['glmatrix'], function(glMatrix) {
 			rect.vertexCount = vertexPositions.length / rect.vertexPositions.size;
 		},
 
+
+
+		//
+		createRenderTarget: function(width, height) {
+			var gl = this.WebGL.gl;
+
+			var framebuffer = gl.createFramebuffer();
+			gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+
+			var frametexture = gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D, frametexture);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+			gl.generateMipmap(gl.TEXTURE_2D);
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+			var depthbuffer = gl.createRenderbuffer();
+			gl.bindRenderbuffer(gl.RENDERBUFFER, depthbuffer);
+			gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+
+			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, frametexture, 0);
+			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthbuffer);
+
+			gl.bindTexture(gl.TEXTURE_2D, null);
+			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+			return {
+				framebuffer: framebuffer,
+				frametexture: frametexture,
+				depthbuffer: depthbuffer,
+				width: width,
+				height: height
+			};
+		},
+
+
+		//////////
+		// Draw //
+		//////////
 		drawRectangleColor: function(program, position, scale, color) {
 			var WebGL = this.WebGL;
 
@@ -93,7 +137,7 @@ define(['glmatrix'], function(glMatrix) {
 
 			WebGL.bindUniform(uniforms.u_position, position);
 			WebGL.bindUniform(uniforms.u_scale, scale);
-			WebGL.bindUniform(uniforms.u_resolution, vec2.fromValues(WebGL.screenWidth, WebGL.screenHeight));
+			WebGL.bindUniform(uniforms.u_resolution, this.resolution);
 
 			WebGL.bindUniform(uniforms.u_color, color);
 
@@ -116,7 +160,7 @@ define(['glmatrix'], function(glMatrix) {
 
 			WebGL.bindUniform(uniforms.u_position, position);
 			WebGL.bindUniform(uniforms.u_scale, scale);
-			WebGL.bindUniform(uniforms.u_resolution, vec2.fromValues(WebGL.screenWidth, WebGL.screenHeight));
+			WebGL.bindUniform(uniforms.u_resolution, this.resolution);
 
 			WebGL.bindTexture(uniforms.u_texture, texture);
 
