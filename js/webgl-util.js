@@ -34,7 +34,7 @@ define(['glmatrix'], function(glMatrix) {
 			]);
 
 			var vertexColors = new Float32Array([
-				1.0, 1.0, 1.0, 0.0,
+				1.0, 1.0, 1.0, 1.0,
 				1.0, 1.0, 1.0, 1.0,
 				1.0, 1.0, 1.0, 1.0,
 				1.0, 1.0, 1.0, 1.0,
@@ -92,10 +92,10 @@ define(['glmatrix'], function(glMatrix) {
 
 			var frametexture = gl.createTexture();
 			gl.bindTexture(gl.TEXTURE_2D, frametexture);
-			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAX_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-			gl.generateMipmap(gl.TEXTURE_2D);
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+			gl.generateMipmap(gl.TEXTURE_2D);
 
 			var depthbuffer = gl.createRenderbuffer();
 			gl.bindRenderbuffer(gl.RENDERBUFFER, depthbuffer);
@@ -137,6 +137,7 @@ define(['glmatrix'], function(glMatrix) {
 
 			WebGL.bindUniform(uniforms.u_position, position);
 			WebGL.bindUniform(uniforms.u_scale, scale);
+			// WebGL.bindUniform(uniforms.u_resolution, vec2.fromValues(WebGL.gl.drawingBufferWidth, WebGL.gl.drawingBufferHeight));
 			WebGL.bindUniform(uniforms.u_resolution, this.resolution);
 
 			WebGL.bindUniform(uniforms.u_color, color);
@@ -147,7 +148,7 @@ define(['glmatrix'], function(glMatrix) {
 		drawRectangleTexture: function(program, position, scale, texture) {
 			var WebGL = this.WebGL;
 
-			if (!WebGL.useProgram(program) || !texture.loaded) {
+			if (!WebGL.useProgram(program) || texture.loaded === false) {
 				return;
 			}
 
@@ -160,6 +161,7 @@ define(['glmatrix'], function(glMatrix) {
 
 			WebGL.bindUniform(uniforms.u_position, position);
 			WebGL.bindUniform(uniforms.u_scale, scale);
+			// WebGL.bindUniform(uniforms.u_resolution, vec2.fromValues(WebGL.gl.drawingBufferWidth, WebGL.gl.drawingBufferHeight));
 			WebGL.bindUniform(uniforms.u_resolution, this.resolution);
 
 			WebGL.bindTexture(uniforms.u_texture, texture);

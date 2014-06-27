@@ -38,7 +38,7 @@ require([
 	Utils.resize();
 	WebGL.setDepth();
 
-	var renderTarget = Utils.createRenderTarget(512, 512);
+	var renderTarget = Utils.createRenderTarget(2048, 2048);
 
 	var colorProgram = WebGL.loadProgram('shaders/color.vert', 'shaders/color.frag', ['a_position', 'a_color'], ['u_resolution', 'u_position', 'u_scale', 'u_color']);
 	var textureProgram = WebGL.loadProgram('shaders/texture.vert', 'shaders/texture.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture']);
@@ -48,23 +48,35 @@ require([
 
 	var colorRect = {
 		pos: vec2.fromValues(100, 100),
-		scale: vec2.fromValues(200, 50),
+		scale: vec2.fromValues(600, 500),
 		color: Color.getArray('red')
 	};
 	var texRect = {
 		pos: vec2.fromValues(500, 400),
-		scale: vec2.fromValues(100, 200)
+		scale: vec2.fromValues(600, 600)
 	};
 
 	function draw() {
+		var gl = WebGL.gl;
 		// WebGL.beginDraw();
 
 		WebGL.bindFramebuffer(renderTarget.framebuffer);
-		WebGL.gl.viewport(0, 0, )
+		WebGL.gl.viewport(0, 0, renderTarget.width, renderTarget.height);
+		WebGL.beginDraw();
 
 		Utils.drawRectangleColor(colorProgram, colorRect.pos, colorRect.scale, colorRect.color);
-
 		Utils.drawRectangleTexture(textureProgram, texRect.pos, texRect.scale, texture);
+
+		gl.bindTexture(gl.TEXTURE_2D, renderTarget.frametexture);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+
+		WebGL.bindFramebuffer(null);
+		WebGL.gl.viewport(0, 0, WebGL.screenWidth, WebGL.screenHeight);
+		WebGL.beginDraw();
+
+		// Utils.drawRectangleTexture(textureProgram, texRect.pos, texRect.scale, texture);
+		Utils.drawRectangleTexture(textureProgram, texRect.pos, texRect.scale, renderTarget.frametexture);
 
 		requestAnimationFrame(draw);
 	}
