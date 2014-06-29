@@ -102,7 +102,6 @@ define(['glmatrix'], function(glMatrix) {
 
 			WebGL.bindUniform(uniforms.u_position, position);
 			WebGL.bindUniform(uniforms.u_scale, scale);
-			// WebGL.bindUniform(uniforms.u_resolution, vec2.fromValues(WebGL.gl.drawingBufferWidth, WebGL.gl.drawingBufferHeight));
 			WebGL.bindUniform(uniforms.u_resolution, this.resolution);
 
 			WebGL.bindUniform(uniforms.u_color, color);
@@ -126,7 +125,6 @@ define(['glmatrix'], function(glMatrix) {
 
 			WebGL.bindUniform(uniforms.u_position, position);
 			WebGL.bindUniform(uniforms.u_scale, scale);
-			// WebGL.bindUniform(uniforms.u_resolution, vec2.fromValues(WebGL.gl.drawingBufferWidth, WebGL.gl.drawingBufferHeight));
 			WebGL.bindUniform(uniforms.u_resolution, this.resolution);
 
 			WebGL.bindTexture(uniforms.u_texture, texture);
