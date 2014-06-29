@@ -103,7 +103,7 @@ define([
       // Second pass
       WebGL.setRenderTarget(this.renderTargetGlowSecond);
       WebGL.beginDraw(Color.getArray('black', 255));
-      Utils.drawRectangleTexture(this.glowFirstProgram, pos, scale, this.renderTargetGlowFirst.frametexture);
+      Utils.drawRectangleTexture(this.glowSecondProgram, pos, scale, this.renderTargetGlowFirst.frametexture);
       WebGL.getTextureFromRenderTarget(this.renderTargetGlowSecond);
 
 

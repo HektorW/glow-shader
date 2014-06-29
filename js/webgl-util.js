@@ -34,12 +34,12 @@ define(['glmatrix'], function(glMatrix) {
 			]);
 
 			var vertexColors = new Float32Array([
+				1.0, 1.0, 1.0, 0.0,
 				1.0, 1.0, 1.0, 1.0,
 				1.0, 1.0, 1.0, 1.0,
 				1.0, 1.0, 1.0, 1.0,
 				1.0, 1.0, 1.0, 1.0,
-				1.0, 1.0, 1.0, 1.0,
-				1.0, 1.0, 1.0, 1.0
+				1.0, 1.0, 1.0, 0.0
 			]);
 
 			var vertexTexcoords = new Float32Array([
