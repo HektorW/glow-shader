@@ -42,6 +42,12 @@ define(['jquery'], function($) {
 			WebGL.screenWidth = canvas.width = width;
 			WebGL.screenHeight = canvas.height = height;
 
+			this.screenRenderTarget = {
+				framebuffer: null,
+				width: width,
+				height: height
+			};
+
 			gl.viewport(0, 0, width, height);
 		},
 
@@ -152,10 +158,49 @@ define(['jquery'], function($) {
 
 
 
+		///////////
+		// Other //
+		///////////
+		createRenderTarget: function(width, height) {
+			var framebuffer = gl.createFramebuffer();
+			gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+
+			var frametexture = gl.createTexture();
+			gl.bindTexture(gl.TEXTURE_2D, frametexture);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+			gl.generateMipmap(gl.TEXTURE_2D);
+
+			var depthbuffer = gl.createRenderbuffer();
+			gl.bindRenderbuffer(gl.RENDERBUFFER, depthbuffer);
+			gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+
+			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, frametexture, 0);
+			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthbuffer);
+
+			gl.bindTexture(gl.TEXTURE_2D, null);
+			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+			gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+			return {
+				framebuffer: framebuffer,
+				frametexture: frametexture,
+				depthbuffer: depthbuffer,
+				width: width,
+				height: height
+			};
+		},
+
+
 		//////////
 		// Draw //
 		//////////
-		beginDraw: function() {
+		beginDraw: function(color) {
+			if (color) {
+				gl.clearColor(color[0], color[1], color[2], color[3]);
+			}
+
 			// Clear buffer
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 		},
@@ -198,8 +243,17 @@ define(['jquery'], function($) {
 			gl.uniform1i(uniformPointer, index);
 		},
 
-		bindFramebuffer: function(framebuffer) {
-			gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+		setRenderTarget: function(renderTarget) {
+			renderTarget = renderTarget || this.screenRenderTarget;
+
+			gl.bindFramebuffer(gl.FRAMEBUFFER, renderTarget.framebuffer);
+			gl.viewport(0, 0, renderTarget.width, renderTarget.height);
+		},
+
+		getTextureFromRenderTarget: function(renderTarget) {
+      gl.bindTexture(gl.TEXTURE_2D, renderTarget.frametexture);
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.bindTexture(gl.TEXTURE_2D, null);
 		},
 
 		drawIndexed: function(num_items) {
