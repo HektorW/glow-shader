@@ -5,8 +5,6 @@ uniform vec2 u_resolution;
 uniform vec2 u_position;
 uniform vec2 u_scale;
 
-varying vec4 v_color;
-
 void main(void){
 	vec2 scaled = a_position * u_scale;
 
@@ -19,6 +17,4 @@ void main(void){
 	vec2 clipSpace = zeroToTwo - 1.0;
 
   gl_Position = vec4(vec2(clipSpace.x, -clipSpace.y), 0, 1);
-
-  v_color = a_color;
 }

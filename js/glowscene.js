@@ -34,22 +34,13 @@ define([
       this.renderTargetGlowSecond = WebGL.createRenderTarget(512, 512);
       this.renderTargetResult = WebGL.createRenderTarget(512, 512);
 
-      this.colorProgram = WebGL.loadProgram('shaders/color.vert', 'shaders/color.frag', ['a_position', 'a_color'], ['u_resolution', 'u_position', 'u_scale', 'u_color']);
+      this.colorProgram = WebGL.loadProgram('shaders/color.vert', 'shaders/color.frag', ['a_position'], ['u_resolution', 'u_position', 'u_scale', 'u_color']);
       this.textureProgram = WebGL.loadProgram('shaders/texture.vert', 'shaders/texture.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture']);
       this.glowFirstProgram = WebGL.loadProgram('shaders/glowfirst.vert', 'shaders/glowfirst.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture']);
       this.glowSecondProgram = WebGL.loadProgram('shaders/glowsecond.vert', 'shaders/glowsecond.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture']);
 
       this.texture = Loader.loadTexture(WebGL.gl, 'res/texture.png');
 
-      this.colorRect = {
-        pos: vec2.fromValues(100, 100),
-        scale: vec2.fromValues(600, 500),
-        color: Color.getArray('red')
-      };
-      this.texRect = {
-        pos: vec2.fromValues(500, 400),
-        scale: vec2.fromValues(600, 600)
-      };
       this.resize();
     },
 
@@ -74,12 +65,14 @@ define([
       var WebGL = this.WebGL;
 
       WebGL.setRenderTarget(this.renderTargetScene);
-      WebGL.beginDraw(Color.getArray('black', 255));
+      WebGL.beginDraw(Color.getArray('black', 1.0));
 
-      Utils.drawRectangleColor(this.colorProgram, vec2.n(100, 100), vec2.n(100, 100), Color.getArray('red'));
-      Utils.drawRectangleColor(this.colorProgram, vec2.n(100, 300), vec2.n(100, 100), Color.getArray('green'));
-      Utils.drawRectangleColor(this.colorProgram, vec2.n(300, 100), vec2.n(100, 100), Color.getArray('yellow'));
-      Utils.drawRectangleColor(this.colorProgram, vec2.n(300, 300), vec2.n(100, 100), Color.getArray('blue'));
+      Utils.drawRectangleColor(this.colorProgram, vec2.n(100, 100), vec2.n(100, 100), Color.getArray('red', 1.0));
+      Utils.drawRectangleColor(this.colorProgram, vec2.n(100, 300), vec2.n(100, 100), Color.getArray('green', 1.0));
+      Utils.drawRectangleColor(this.colorProgram, vec2.n(300, 100), vec2.n(100, 100), Color.getArray('yellow', 0.4));
+      Utils.drawRectangleColor(this.colorProgram, vec2.n(300, 300), vec2.n(100, 100), Color.getArray('blue', 1.0));
+
+      Utils.drawCircleColor(this.colorProgram, vec2.n(500, 300), vec2.n(50, 50), Color.getArray('blue', 0.2));
 
       // Utils.drawRectangleTexture(this.textureProgram, vec2.n(500, 100), vec2.n(100, 100), this.texture);
 
@@ -95,23 +88,23 @@ define([
 
       // First pass
       WebGL.setRenderTarget(this.renderTargetGlowFirst);
-      WebGL.beginDraw(Color.getArray('black', 255));
+      WebGL.beginDraw(Color.getArray('black', 1.0));
       Utils.drawRectangleTexture(this.glowFirstProgram, pos, scale, this.renderTargetScene.frametexture);
       WebGL.getTextureFromRenderTarget(this.renderTargetGlowFirst);
 
 
       // Second pass
       WebGL.setRenderTarget(this.renderTargetGlowSecond);
-      WebGL.beginDraw(Color.getArray('black', 255));
+      WebGL.beginDraw(Color.getArray('black', 1.0));
       Utils.drawRectangleTexture(this.glowSecondProgram, pos, scale, this.renderTargetGlowFirst.frametexture);
       WebGL.getTextureFromRenderTarget(this.renderTargetGlowSecond);
 
 
-      // add
+      /*// add
       WebGL.setRenderTarget(this.renderTargetResult);
-      WebGL.beginDraw(Color.getArray('black', 255));
+      WebGL.beginDraw(Color.getArray('black', 1.0));
       Utils.drawRectangleTexture(this.textureProgram, pos, scale, this.renderTargetGlowSecond.frametexture);
-      WebGL.getTextureFromRenderTarget(this.renderTargetResult);
+      WebGL.getTextureFromRenderTarget(this.renderTargetResult);*/
     },
 
 
@@ -119,7 +112,7 @@ define([
       var WebGL = this.WebGL;
 
       WebGL.setRenderTarget(null);
-      WebGL.beginDraw(Color.getArray('white', 255));
+      WebGL.beginDraw(Color.getArray('white', 1.0));
 
       var halfWidth = window.innerWidth / 2.0;
       var halfHeight = window.innerHeight / 2.0;
