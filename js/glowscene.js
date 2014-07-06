@@ -29,15 +29,15 @@ define([
     load: function() {
       WebGL = this.WebGL;
 
-      this.renderTargetScene = WebGL.createRenderTarget(512, 512);
-      this.renderTargetGlowFirst = WebGL.createRenderTarget(512, 512);
-      this.renderTargetGlowSecond = WebGL.createRenderTarget(512, 512);
-      this.renderTargetResult = WebGL.createRenderTarget(512, 512);
+      this.renderTargetScene = WebGL.createRenderTarget(1024, 1024);
+      this.renderTargetGlowFirst = WebGL.createRenderTarget(1024, 1024);
+      this.renderTargetGlowSecond = WebGL.createRenderTarget(1024, 1024);
+      this.renderTargetResult = WebGL.createRenderTarget(1024, 1024);
 
       this.colorProgram = WebGL.loadProgram('shaders/color.vert', 'shaders/color.frag', ['a_position'], ['u_resolution', 'u_position', 'u_scale', 'u_color']);
       this.textureProgram = WebGL.loadProgram('shaders/texture.vert', 'shaders/texture.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture']);
-      this.glowFirstProgram = WebGL.loadProgram('shaders/glowfirst.vert', 'shaders/glowfirst.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture']);
-      this.glowSecondProgram = WebGL.loadProgram('shaders/glowsecond.vert', 'shaders/glowsecond.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture']);
+      this.glowProgram = WebGL.loadProgram('shaders/glow.vert', 'shaders/glow.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture', 'u_textureresolution', 'u_direction']);
+      // this.glowSecondProgram = WebGL.loadProgram('shaders/glowsecond.vert', 'shaders/glowsecond.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture']);
 
       this.texture = Loader.loadTexture(WebGL.gl, 'res/texture.png');
 
@@ -85,19 +85,39 @@ define([
       var pos = vec2.n(0, 0);
       var scale = vec2.n(window.innerWidth, window.innerHeight);
 
+      var target, program;
+
 
       // First pass
-      WebGL.setRenderTarget(this.renderTargetGlowFirst);
+      target = this.renderTargetGlowFirst;
+      program = this.glowProgram;
+      if (!WebGL.useProgram(program))
+        return;
+
+      WebGL.setRenderTarget(target);
       WebGL.beginDraw(Color.getArray('black', 1.0));
-      Utils.drawRectangleTexture(this.glowFirstProgram, pos, scale, this.renderTargetScene.frametexture);
-      WebGL.getTextureFromRenderTarget(this.renderTargetGlowFirst);
+
+      WebGL.bindUniform(program.uniforms.u_textureresolution, vec2.n(target.width, target.height));
+      WebGL.bindUniform(program.uniforms.u_direction, vec2.n(Math.cos(performance.now() * 0.001 + 2.5), 0));
+
+      Utils.drawRectangleTexture(program, pos, scale, this.renderTargetScene.frametexture);
+      WebGL.getTextureFromRenderTarget(target);
 
 
       // Second pass
-      WebGL.setRenderTarget(this.renderTargetGlowSecond);
+      // First pass
+      target = this.renderTargetGlowSecond;
+      if (!WebGL.useProgram(program))
+        return;
+
+      WebGL.setRenderTarget(target);
       WebGL.beginDraw(Color.getArray('black', 1.0));
-      Utils.drawRectangleTexture(this.glowSecondProgram, pos, scale, this.renderTargetGlowFirst.frametexture);
-      WebGL.getTextureFromRenderTarget(this.renderTargetGlowSecond);
+
+      WebGL.bindUniform(program.uniforms.u_textureresolution, vec2.n(target.width, target.height));
+      WebGL.bindUniform(program.uniforms.u_direction, vec2.n(0, 1));
+
+      Utils.drawRectangleTexture(program, pos, scale, this.renderTargetGlowFirst.frametexture);
+      WebGL.getTextureFromRenderTarget(target);
 
 
       /*// add

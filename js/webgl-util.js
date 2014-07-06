@@ -90,7 +90,7 @@ define(['glmatrix'], function(glMatrix) {
 			}
 			var gl = this.WebGL.gl;
 
-			var angleCount = 64;
+			var angleCount = 8;
 			var delta = (Math.PI * 2) / angleCount;
 
 			var angle = 0.0;
