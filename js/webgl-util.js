@@ -90,7 +90,7 @@ define(['glmatrix'], function(glMatrix) {
 			}
 			var gl = this.WebGL.gl;
 
-			var angleCount = 8;
+			var angleCount = 32;
 			var delta = (Math.PI * 2) / angleCount;
 
 			var angle = 0.0;
@@ -149,7 +149,7 @@ define(['glmatrix'], function(glMatrix) {
 		drawRectangleTexture: function(program, position, scale, texture) {
 			var WebGL = this.WebGL;
 
-			if (!WebGL.useProgram(program) || texture.loaded === false) {
+			if (!WebGL.useProgram(program) || (texture && texture.loaded === false)) {
 				return;
 			}
 
@@ -164,7 +164,8 @@ define(['glmatrix'], function(glMatrix) {
 			WebGL.bindUniform(uniforms.u_scale, scale);
 			WebGL.bindUniform(uniforms.u_resolution, this.resolution);
 
-			WebGL.bindTexture(uniforms.u_texture, texture);
+			if (texture)
+				WebGL.bindTexture(uniforms.u_texture, texture);
 
 			WebGL.drawVertices(rect.vertexCount);
 		},

@@ -37,7 +37,7 @@ define([
       this.colorProgram = WebGL.loadProgram('shaders/color.vert', 'shaders/color.frag', ['a_position'], ['u_resolution', 'u_position', 'u_scale', 'u_color']);
       this.textureProgram = WebGL.loadProgram('shaders/texture.vert', 'shaders/texture.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture']);
       this.glowProgram = WebGL.loadProgram('shaders/glow.vert', 'shaders/glow.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture', 'u_textureresolution', 'u_direction']);
-      // this.glowSecondProgram = WebGL.loadProgram('shaders/glowsecond.vert', 'shaders/glowsecond.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture']);
+      this.blendProgram = WebGL.loadProgram('shaders/blend.vert', 'shaders/blend.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture', 'u_textureglow']);
 
       this.texture = Loader.loadTexture(WebGL.gl, 'res/texture.png');
 
@@ -72,7 +72,7 @@ define([
       Utils.drawRectangleColor(this.colorProgram, vec2.n(300, 100), vec2.n(100, 100), Color.getArray('yellow', 0.4));
       Utils.drawRectangleColor(this.colorProgram, vec2.n(300, 300), vec2.n(100, 100), Color.getArray('blue', 1.0));
 
-      Utils.drawCircleColor(this.colorProgram, vec2.n(500, 300), vec2.n(50, 50), Color.getArray('blue', 0.2));
+      Utils.drawCircleColor(this.colorProgram, vec2.n(500, 300), vec2.n(50, 50), Color.getArray('blue', 0.0));
 
       // Utils.drawRectangleTexture(this.textureProgram, vec2.n(500, 100), vec2.n(100, 100), this.texture);
 
@@ -87,6 +87,8 @@ define([
 
       var target, program;
 
+      var glowAmount = Math.cos(performance.now() * 0.001 + 2.5) * 5.0;
+
 
       // First pass
       target = this.renderTargetGlowFirst;
@@ -98,14 +100,13 @@ define([
       WebGL.beginDraw(Color.getArray('black', 1.0));
 
       WebGL.bindUniform(program.uniforms.u_textureresolution, vec2.n(target.width, target.height));
-      WebGL.bindUniform(program.uniforms.u_direction, vec2.n(Math.cos(performance.now() * 0.001 + 2.5), 0));
+      WebGL.bindUniform(program.uniforms.u_direction, vec2.n(glowAmount, 0));
 
       Utils.drawRectangleTexture(program, pos, scale, this.renderTargetScene.frametexture);
       WebGL.getTextureFromRenderTarget(target);
 
 
       // Second pass
-      // First pass
       target = this.renderTargetGlowSecond;
       if (!WebGL.useProgram(program))
         return;
@@ -114,17 +115,27 @@ define([
       WebGL.beginDraw(Color.getArray('black', 1.0));
 
       WebGL.bindUniform(program.uniforms.u_textureresolution, vec2.n(target.width, target.height));
-      WebGL.bindUniform(program.uniforms.u_direction, vec2.n(0, 1));
+      WebGL.bindUniform(program.uniforms.u_direction, vec2.n(0, glowAmount));
 
       Utils.drawRectangleTexture(program, pos, scale, this.renderTargetGlowFirst.frametexture);
       WebGL.getTextureFromRenderTarget(target);
 
 
-      /*// add
-      WebGL.setRenderTarget(this.renderTargetResult);
+      // add
+      target = this.renderTargetResult;
+      program = this.blendProgram;
+      if (!WebGL.useProgram(program))
+        return;
+
+      WebGL.setRenderTarget(target);
       WebGL.beginDraw(Color.getArray('black', 1.0));
-      Utils.drawRectangleTexture(this.textureProgram, pos, scale, this.renderTargetGlowSecond.frametexture);
-      WebGL.getTextureFromRenderTarget(this.renderTargetResult);*/
+
+      WebGL.bindTexture(program.uniforms.u_textureglow, this.renderTargetScene.frametexture, 1);
+      WebGL.bindTexture(program.uniforms.u_textureglow, this.renderTargetGlowSecond.frametexture, 0);
+
+      Utils.drawRectangleTexture(program, pos, scale);
+      // Utils.drawRectangleTexture(program, pos, scale, this.renderTargetScene.frametexture);
+      WebGL.getTextureFromRenderTarget(target);
     },
 
 

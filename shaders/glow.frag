@@ -19,7 +19,7 @@ void main(void) {
 
 
 
-  const int length = 11;
+  /* const int length = 11;
   float values[length];
   values[0] = 1.0;
   values[1] = 2.0;
@@ -31,21 +31,39 @@ void main(void) {
   values[7] = 8.0;
   values[8] = 4.0;
   values[9] = 2.0;
-  values[10] = 1.0;
+  values[10] = 1.0; */
 
   /* const int length = 5;
   float values[length];
   values[0] = 1.0;
-  values[1] = 2.0;
-  values[2] = 4.0;
-  values[3] = 2.0;
+  values[1] = 1.0;
+  values[2] = 1.0;
+  values[3] = 1.0;
   values[4] = 1.0; */
+
+  /* const int length = 5;
+  float values[length];
+  values[0] = 0.0219;
+  values[1] = 0.0983;
+  values[2] = 0.1621;
+  values[3] = 0.0983;
+  values[4] = 0.0219; */
+
+  const int length = 7;
+  float values[length];
+  values[0] = 0.00038771;
+  values[1] = 0.01330373;
+  values[2] = 0.11098164;
+  values[3] = 0.22508352;
+  values[4] = 0.11098164;
+  values[5] = 0.01330373;
+  values[6] = 0.00038771;
   
 
   vec4 totalColor = vec4(0.0, 0.0, 0.0, 0.0);
   float totalValue = 0.0;
 
-  vec2 onePixel = vec2(2, 2) / u_textureresolution;
+  vec2 onePixel = vec2(1, 1) / u_textureresolution;
 
   for (int i = 0; i < length; i++) {
     float sample = float(i-((length-1) / 2));
