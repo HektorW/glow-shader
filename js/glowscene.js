@@ -21,6 +21,8 @@ define([
     init: function(WebGL) {
       this.WebGL = WebGL;
 
+      window.F = this;
+
       this.load();
 
     },
@@ -36,8 +38,8 @@ define([
 
       this.colorProgram = WebGL.loadProgram('shaders/color.vert', 'shaders/color.frag', ['a_position'], ['u_resolution', 'u_position', 'u_scale', 'u_color']);
       this.textureProgram = WebGL.loadProgram('shaders/texture.vert', 'shaders/texture.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture']);
-      this.glowProgram = WebGL.loadProgram('shaders/glow.vert', 'shaders/glow.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture', 'u_textureresolution', 'u_direction']);
-      this.blendProgram = WebGL.loadProgram('shaders/blend.vert', 'shaders/blend.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture', 'u_textureglow']);
+      this.glowProgram = WebGL.loadProgram('shaders/texture.vert', 'shaders/glow.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture', 'u_textureresolution', 'u_direction']);
+      this.blendProgram = WebGL.loadProgram('shaders/texture.vert', 'shaders/blend.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture', 'u_textureglow']);
 
       this.texture = Loader.loadTexture(WebGL.gl, 'res/texture.png');
 
@@ -87,7 +89,8 @@ define([
 
       var target, program;
 
-      var glowAmount = Math.cos(performance.now() * 0.001 + 2.5) * 5.0;
+      // var glowAmount = Math.cos(performance.now() * 0.001 + 2.5) * 3.0;
+      var glowAmount = 5.0;
 
 
       // First pass
@@ -124,13 +127,14 @@ define([
       // add
       target = this.renderTargetResult;
       program = this.blendProgram;
+      // program = this.blendProgram;
       if (!WebGL.useProgram(program))
         return;
 
       WebGL.setRenderTarget(target);
       WebGL.beginDraw(Color.getArray('black', 1.0));
 
-      WebGL.bindTexture(program.uniforms.u_textureglow, this.renderTargetScene.frametexture, 1);
+      WebGL.bindTexture(program.uniforms.u_texture, this.renderTargetScene.frametexture, 1);
       WebGL.bindTexture(program.uniforms.u_textureglow, this.renderTargetGlowSecond.frametexture, 0);
 
       Utils.drawRectangleTexture(program, pos, scale);
@@ -154,6 +158,33 @@ define([
       Utils.drawRectangleTexture(this.textureProgram, vec2.n(halfWidth + 10, 10), scale, this.renderTargetGlowFirst.frametexture);
       Utils.drawRectangleTexture(this.textureProgram, vec2.n(10, halfHeight + 10), scale, this.renderTargetGlowSecond.frametexture);
       Utils.drawRectangleTexture(this.textureProgram, vec2.n(halfWidth + 10, halfHeight + 10), scale, this.renderTargetResult.frametexture);
+    },
+
+
+
+
+
+    gaussianBlurValue: function(size, sigma) {
+      var pow = Math.pow, PI = Math.PI, exp = Math.exp;
+      var sigmasq = pow(sigma, 2);
+      var mean = parseInt(size / 2, 10);
+      var x, y, i, sum = 0.0;
+
+      var kernel = Array(size);
+      for (x = size; x--; ) {
+        kernel[x] = Array(size);
+        for (y = size; y--; ) {
+          sum += kernel[x][y] = (1 / (2 * PI * sigmasq)) * exp(-(pow(x - mean, 2) + pow(y - mean, 2)) / (2 * sigmasq));
+        }
+      }
+
+      var row = Array(size);
+      for (i = size; i--; ) {
+        // row[i] = kernel[i][2];
+        row[i] = kernel[i][mean] / sum;
+      }
+
+      return row;
     }
 
   };
