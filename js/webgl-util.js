@@ -90,7 +90,7 @@ define(['glmatrix'], function(glMatrix) {
 			}
 			var gl = this.WebGL.gl;
 
-			var angleCount = 32;
+			var angleCount = 64;
 			var delta = (Math.PI * 2) / angleCount;
 
 			var angle = 0.0;
@@ -123,7 +123,7 @@ define(['glmatrix'], function(glMatrix) {
 		//////////
 		// Draw //
 		//////////
-		drawRectangleColor: function(program, position, scale, color) {
+		drawRectangleColor: function(program, position, scale, color, resolution) {
 			var WebGL = this.WebGL;
 
 			if (!WebGL.useProgram(program)) {
@@ -139,7 +139,7 @@ define(['glmatrix'], function(glMatrix) {
 
 			WebGL.bindUniform(uniforms.u_position, position);
 			WebGL.bindUniform(uniforms.u_scale, scale);
-			WebGL.bindUniform(uniforms.u_resolution, this.resolution);
+			WebGL.bindUniform(uniforms.u_resolution, resolution || this.resolution);
 
 			WebGL.bindUniform(uniforms.u_color, color);
 
@@ -170,7 +170,7 @@ define(['glmatrix'], function(glMatrix) {
 			WebGL.drawVertices(rect.vertexCount);
 		},
 
-		drawCircleColor: function(program, position, scale, color) {
+		drawCircleColor: function(program, position, scale, color, resolution) {
 			var WebGL = this.WebGL;
 
 			if (!WebGL.useProgram(program)) {
@@ -185,7 +185,7 @@ define(['glmatrix'], function(glMatrix) {
 
 			WebGL.bindUniform(uniforms.u_position, position);
 			WebGL.bindUniform(uniforms.u_scale, scale);
-			WebGL.bindUniform(uniforms.u_resolution, this.resolution);
+			WebGL.bindUniform(uniforms.u_resolution, resolution || this.resolution);
 
 			WebGL.bindUniform(uniforms.u_color, color);
 

@@ -69,14 +69,7 @@ define([
       WebGL.setRenderTarget(this.renderTargetScene);
       WebGL.beginDraw(Color.getArray('black', 1.0));
 
-      Utils.drawRectangleColor(this.colorProgram, vec2.n(100, 100), vec2.n(100, 100), Color.getArray('red', 1.0));
-      Utils.drawRectangleColor(this.colorProgram, vec2.n(100, 300), vec2.n(100, 100), Color.getArray('green', 1.0));
-      Utils.drawRectangleColor(this.colorProgram, vec2.n(300, 100), vec2.n(100, 100), Color.getArray('yellow', 0.4));
-      Utils.drawRectangleColor(this.colorProgram, vec2.n(300, 300), vec2.n(100, 100), Color.getArray('blue', 1.0));
-
-      Utils.drawCircleColor(this.colorProgram, vec2.n(500, 300), vec2.n(50, 50), Color.getArray('blue', 0.0));
-
-      // Utils.drawRectangleTexture(this.textureProgram, vec2.n(500, 100), vec2.n(100, 100), this.texture);
+      Utils.drawCircleColor(this.colorProgram, vec2.n(500, 300), vec2.n(50, 50), Color.getArray('white', 1.0)/*, vec2.n(1024, 1024)*/);
 
       WebGL.getTextureFromRenderTarget(this.renderTargetScene);
     },
@@ -89,8 +82,8 @@ define([
 
       var target, program;
 
-      // var glowAmount = Math.cos(performance.now() * 0.001 + 2.5) * 3.0;
-      var glowAmount = 5.0;
+      var glowAmount = (Math.cos(performance.now() * 0.001) + 1.0) * 3.0 + 5.0;
+      // var glowAmount = 10.0;
 
 
       // First pass
@@ -154,17 +147,16 @@ define([
 
       var scale = vec2.n(halfWidth - 20, halfHeight - 20);
 
-      Utils.drawRectangleTexture(this.textureProgram, vec2.n(10, 10), scale, this.renderTargetScene.frametexture);
+      /*Utils.drawRectangleTexture(this.textureProgram, vec2.n(10, 10), scale, this.renderTargetScene.frametexture);
       Utils.drawRectangleTexture(this.textureProgram, vec2.n(halfWidth + 10, 10), scale, this.renderTargetGlowFirst.frametexture);
       Utils.drawRectangleTexture(this.textureProgram, vec2.n(10, halfHeight + 10), scale, this.renderTargetGlowSecond.frametexture);
-      Utils.drawRectangleTexture(this.textureProgram, vec2.n(halfWidth + 10, halfHeight + 10), scale, this.renderTargetResult.frametexture);
+      Utils.drawRectangleTexture(this.textureProgram, vec2.n(halfWidth + 10, halfHeight + 10), scale, this.renderTargetResult.frametexture);*/
+
+      Utils.drawRectangleTexture(this.textureProgram, vec2.n(0, 0), vec2.n(window.innerWidth, window.innerHeight), this.renderTargetResult.frametexture);
     },
 
 
-
-
-
-    gaussianBlurValue: function(size, sigma) {
+    getGaussianKernelMatrix: function(size, sigma) {
       var pow = Math.pow, PI = Math.PI, exp = Math.exp;
       var sigmasq = pow(sigma, 2);
       var mean = parseInt(size / 2, 10);
@@ -178,10 +170,23 @@ define([
         }
       }
 
+      // normalize
+      for (x = size; x--; ) {
+        for (y = size; y--; ) {
+          kernel[x][y] /= sum;
+        }
+      }
+
+      return kernel;
+    },
+
+    get1DGaussianKernel: function(size, sigma) {
+      var matrix = this.getGaussianKernelMatrix(size, sigma);
       var row = Array(size);
-      for (i = size; i--; ) {
-        // row[i] = kernel[i][2];
-        row[i] = kernel[i][mean] / sum;
+      var mean = parseInt(size / 2, 10);
+
+      for (var i = size; i--; ) {
+        row[i] = matrix[i][mean];
       }
 
       return row;

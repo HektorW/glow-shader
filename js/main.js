@@ -1,7 +1,14 @@
 require.config({
 	paths: {
 		jquery: '../libs/jquery',
-		glmatrix: '../libs/glmatrix'
+		glmatrix: '../libs/glmatrix',
+		'dat.gui': '../libs/dat.gui'
+	},
+
+	shim: {
+		'dat.gui': {
+			exports: 'dat'
+		}
 	}
 });
 
@@ -11,14 +18,16 @@ require([
 	'webgl',
 	'webgl-util',
 
-	'glowscene'
+	'glowscene',
+	'bloomscene'
 ], function(
 	$,
 
 	WebGL,
 	Utils,
 
-	GlowScene
+	GlowScene,
+	Bloomscene
 ) {
 
 	function init() {
@@ -31,7 +40,8 @@ require([
 
 		WebGL.setDepth();
 		Utils.init(WebGL);
-		GlowScene.init(WebGL);
+		// GlowScene.init(WebGL);
+		Bloomscene.init(WebGL);
 
 		$(window).on('resize', resize);
 	}
@@ -39,14 +49,17 @@ require([
 
 
 	function resize() {
-		WebGL.resize(window.innerWidth, window.innerHeight);
+		// WebGL.resize(window.innerWidth, window.innerHeight);
+		WebGL.resize(1024, 1024);
 		Utils.resize();
-		GlowScene.resize();
+		// GlowScene.resize();
+		Bloomscene.resize();
 	}
 
 
 	function draw() {
-		GlowScene.draw();
+		// GlowScene.draw();
+		Bloomscene.draw();
 
 		requestAnimationFrame(draw);
 	}
