@@ -190,7 +190,19 @@ define(['glmatrix'], function(glMatrix) {
 			WebGL.bindUniform(uniforms.u_color, color);
 
 			WebGL.drawVertices(circle.vertexCount);
-		}
+		},
+
+
+
+
+		isLoaded: function(){
+      for (var i = arguments.length; i--; ) {
+        if (arguments[i] && !arguments[i].loaded) {
+          return false;
+        }
+      }
+      return true;
+    }
 	};
 
 	return Utils;

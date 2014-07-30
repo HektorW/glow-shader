@@ -17,6 +17,7 @@ define([
 ) {
   var vec2 = glMatrix.vec2;
   var blackColor = Color.getArray('black', 1.0);
+  var transparentColor = Color.getArray('black', 1.0);
 
 
   var BloomScene = {
@@ -24,7 +25,7 @@ define([
       this.WebGL = WebGL;
 
       this.load();
-      this.setupKernels();
+      // this.setupKernels();
 
       $(window)
         .on('mousedown', $.proxy(function() { this.mousedown = true; }, this))
@@ -37,7 +38,7 @@ define([
 
       // Programs
       this.textureProgram = WebGL.loadProgram('shaders/texture.vert', 'shaders/texture.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture']);
-      this.kernel1dProgram = WebGL.loadProgram(
+      /*this.kernel1dProgram = WebGL.loadProgram(
         'shaders/texture.vert', 'shaders/kernel_1d.frag',
         ['a_position', 'a_texcoord'],
         ['u_resolution', 'u_position', 'u_scale', 'u_texture', 'u_textureresolution', 'u_direction', 'u_kernel', 'u_kernelsize']
@@ -46,15 +47,16 @@ define([
         'shaders/texture.vert', 'shaders/kernel.frag',
         ['a_position', 'a_texcoord'],
         ['u_resolution', 'u_position', 'u_scale', 'u_texture', 'u_textureresolution', 'u_kernel', 'u_kernelsize']
-      );
+      );*/
       this.blendProgram = WebGL.loadProgram('shaders/texture.vert', 'shaders/blend.frag', ['a_position', 'a_texcoord'], ['u_resolution', 'u_position', 'u_scale', 'u_texture1', 'u_texture2']);
 
       // Textures
       this.diffuseTexture = Loader.loadTexture(WebGL.gl, 'res/diffuse_square.png');
-      this.glowTexture = Loader.loadTexture(WebGL.gl, 'res/glow_square_blur.png');
+      this.glowTexture = Loader.loadTexture(WebGL.gl, 'res/glow_square2.png');
 
       // Render targets
-      this.rtGlowSources = WebGL.createRenderTarget(1024, 1024);
+      this.rtDiffuse = WebGL.createRenderTarget(1024, 1024);
+      this.rtGlow = WebGL.createRenderTarget(1024, 1024);
     },
 
 
@@ -75,11 +77,11 @@ define([
       var WebGL = this.WebGL;
 
       this.drawGlowParts(WebGL);
-      if (window.Main.blend) {
+        this.drawDiffuse(WebGL);
+      if (window.Main.blend || this.mousedown) {
         this.drawBlend(WebGL);
       } else {
-        this.drawDiffuse(WebGL);
-        // this.drawResults(WebGL);
+        this.drawResults(WebGL);
       }
 
       /*WebGL.beginDraw(Color.getArray('black', 1.0));
@@ -119,21 +121,23 @@ define([
     },
 
     drawGlowParts: function(WebGL) {
-      WebGL.setRenderTarget(this.rtGlowSources);
-      WebGL.beginDraw(Color.getArray('black', 1.0));
+      WebGL.setRenderTarget(this.rtGlow);
+      WebGL.beginDraw(transparentColor);
 
       var res = vec2.fromValues(1, 1);
       Utils.drawRectangleTexture(this.textureProgram, vec2.fromValues(0, 0), res, this.glowTexture, res);
 
-      WebGL.getTextureFromRenderTarget(this.rtGlowSources);
+      WebGL.getTextureFromRenderTarget(this.rtGlow);
     },
 
     drawDiffuse: function(WebGL) {
-      WebGL.setRenderTarget(null);
-      WebGL.beginDraw(blackColor);
+      WebGL.setRenderTarget(this.rtDiffuse);
+      WebGL.beginDraw(transparentColor);
 
       var res = vec2.fromValues(1, 1);
       Utils.drawRectangleTexture(this.textureProgram, vec2.fromValues(0, 0), res, this.diffuseTexture, res);
+
+      WebGL.getTextureFromRenderTarget(this.rtDiffuse);
     },
 
 
@@ -142,7 +146,7 @@ define([
       WebGL.beginDraw(blackColor);
 
       var res = vec2.fromValues(1, 1);
-      Utils.drawRectangleTexture(this.textureProgram, vec2.fromValues(0, 0), res, this.rtGlowSources.frametexture, res);
+      Utils.drawRectangleTexture(this.textureProgram, vec2.fromValues(0, 0), res, this.rtGlow.frametexture, res);
     },
 
     drawBlend: function(WebGL) {
@@ -154,7 +158,7 @@ define([
       gl.enable(gl.BLEND);
 
       WebGL.setRenderTarget(null);
-      WebGL.beginDraw(blackColor);      
+      WebGL.beginDraw(transparentColor);      
 
       var program = this.blendProgram
       WebGL.useProgram(program);
@@ -173,10 +177,11 @@ define([
       WebGL.bindUniform(program.uniforms.u_resolution, res);
 
       // frag uniforms
-      WebGL.bindTexture(program.uniforms.u_texture1, this.diffuseTexture, 0);
+      // WebGL.bindTexture(program.uniforms.u_texture1, this.diffuseTexture, 0);
+      WebGL.bindTexture(program.uniforms.u_texture1, this.rtDiffuse.frametexture, 0);
       // WebGL.bindTexture(program.uniforms.u_texture2, this.diffuseTexture, 1);
       // WebGL.bindTexture(program.uniforms.u_texture2, this.glowTexture, 1);
-      WebGL.bindTexture(program.uniforms.u_texture2, this.rtGlowSources.frametexture, 1);
+      WebGL.bindTexture(program.uniforms.u_texture2, this.rtGlow.frametexture, 1);
 
       WebGL.drawVertices(rect.vertexCount)
     },
