@@ -146,7 +146,7 @@ define(['glmatrix'], function(glMatrix) {
 			WebGL.drawVertices(rect.vertexCount);
 		},
 
-		drawRectangleTexture: function(program, position, scale, texture) {
+		drawRectangleTexture: function(program, position, scale, texture, resolution) {
 			var WebGL = this.WebGL;
 
 			if (!WebGL.useProgram(program) || (texture && texture.loaded === false)) {
@@ -162,7 +162,7 @@ define(['glmatrix'], function(glMatrix) {
 
 			WebGL.bindUniform(uniforms.u_position, position);
 			WebGL.bindUniform(uniforms.u_scale, scale);
-			WebGL.bindUniform(uniforms.u_resolution, this.resolution);
+			WebGL.bindUniform(uniforms.u_resolution, resolution || this.resolution);
 
 			if (texture)
 				WebGL.bindTexture(uniforms.u_texture, texture);

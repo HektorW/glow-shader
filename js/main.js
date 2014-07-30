@@ -30,6 +30,10 @@ require([
 	Bloomscene
 ) {
 
+	window.Main = {
+		running: true
+	};
+
 	function init() {
 		var canvas = $('#canvas').get(0);
 
@@ -38,7 +42,8 @@ require([
 			return;
 		}
 
-		WebGL.setDepth();
+		// WebGL.setDepth();
+		WebGL.setBlend();
 		Utils.init(WebGL);
 		// GlowScene.init(WebGL);
 		Bloomscene.init(WebGL);
@@ -61,7 +66,8 @@ require([
 		// GlowScene.draw();
 		Bloomscene.draw();
 
-		requestAnimationFrame(draw);
+		if (Main.running)
+			requestAnimationFrame(draw);
 	}
 
 
