@@ -168,17 +168,17 @@ define(['jquery'], function($) {
 			var frametexture = gl.createTexture();
 			gl.bindTexture(gl.TEXTURE_2D, frametexture);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-			// gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 			gl.generateMipmap(gl.TEXTURE_2D);
 
-			var depthbuffer = gl.createRenderbuffer();
-			gl.bindRenderbuffer(gl.RENDERBUFFER, depthbuffer);
-			gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
-
 			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, frametexture, 0);
-			gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthbuffer);
+
+			// var depthbuffer = gl.createRenderbuffer();
+			// gl.bindRenderbuffer(gl.RENDERBUFFER, depthbuffer);
+			// gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+			// gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthbuffer);
+
 
 			gl.bindTexture(gl.TEXTURE_2D, null);
 			gl.bindRenderbuffer(gl.RENDERBUFFER, null);
@@ -187,7 +187,7 @@ define(['jquery'], function($) {
 			return {
 				framebuffer: framebuffer,
 				frametexture: frametexture,
-				depthbuffer: depthbuffer,
+				// depthbuffer: depthbuffer,
 				width: width,
 				height: height
 			};

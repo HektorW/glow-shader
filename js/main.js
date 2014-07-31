@@ -20,7 +20,8 @@ require([
 
 	'glowscene',
 	'bloomscene',
-	'downsamplescene'
+	'downsamplescene',
+	'downsamplegaussianscene'
 ], function(
 	$,
 
@@ -29,7 +30,8 @@ require([
 
 	GlowScene,
 	BloomScene,
-	DownsampleScene
+	DownsampleScene,
+	DownsampleGaussianScene
 ) {
 
 	window.Main = {
@@ -49,7 +51,8 @@ require([
 		Utils.init(WebGL);
 		// GlowScene.init(WebGL);
 		// BloomScene.init(WebGL);
-		DownsampleScene.init(WebGL);
+		// DownsampleScene.init(WebGL);
+		DownsampleGaussianScene.init(WebGL);
 
 		$(window).on('resize', resize);
 	}
@@ -62,14 +65,16 @@ require([
 		Utils.resize();
 		// GlowScene.resize();
 		// BloomScene.resize();
-		DownsampleScene.resize();
+		// DownsampleScene.resize();
+		DownsampleGaussianScene.resize();
 	}
 
 
 	function draw() {
 		// GlowScene.draw();
 		// BloomScene.draw();
-		DownsampleScene.draw();
+		// DownsampleScene.draw();
+		DownsampleGaussianScene.draw();
 
 		if (Main.running)
 			requestAnimationFrame(draw);

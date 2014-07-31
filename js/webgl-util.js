@@ -195,13 +195,76 @@ define(['glmatrix'], function(glMatrix) {
 
 
 
-		isLoaded: function(){
+		fillArray: function(array, size, value) {
+      var res = [];
+      res.push.apply(res, array)
+      for (var i = Math.max(size - array.length, 0); i--; ) {
+        res.push(value || 0.0);
+      }
+      return res;
+    },
+
+    flattenArray: function(array) {
+      var res = [];
+      for (var i = array.length; i--; ) {
+        var a = array[i];
+        if (a.length) {
+          for (var j = a.length; j--; ) {
+            res.push(a[j]);
+          }
+        } else {
+          res.push(a);
+        }
+      }
+
+      return res;
+    },
+
+    isLoaded: function(){
       for (var i = arguments.length; i--; ) {
         if (arguments[i] && !arguments[i].loaded) {
           return false;
         }
       }
       return true;
+    },
+
+
+    getGaussianKernelMatrix: function(size, sigma) {
+      var pow = Math.pow, PI = Math.PI, exp = Math.exp;
+      var sigmasq = pow(sigma, 2);
+      var mean = parseInt(size / 2, 10);
+      var x, y, i, sum = 0.0;
+
+      var kernel = Array(size);
+      for (x = size; x--; ) {
+        kernel[x] = Array(size);
+        for (y = size; y--; ) {
+          sum += kernel[x][y] = (1 / (2 * PI * sigmasq)) * exp(-(pow(x - mean, 2) + pow(y - mean, 2)) / (2 * sigmasq));
+        }
+      }
+
+      // normalize
+      for (x = size; x--; ) {
+        for (y = size; y--; ) {
+          kernel[x][y] /= sum;
+          // kernel[x][y] *= 3.0;
+        }
+      }
+
+      return kernel;
+    },
+
+    get1DGaussianKernel: function(size, sigma) {
+      var matrix = this.getGaussianKernelMatrix(size, sigma);
+      var row = Array(size);
+      var mean = parseInt(size / 2, 10);
+
+      for (var i = size; i--; ) {
+        row[i] = matrix[i][mean];
+      }
+
+      return row;
     }
 	};
 
