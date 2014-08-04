@@ -24,10 +24,6 @@ define([
       this.WebGL = WebGL;
 
       this.load();
-
-      $(window)
-        .on('mousedown', $.proxy(function() { this.mousedown = true; }, this))
-        .on('mouseup', $.proxy(function() { this.mousedown = false; }, this));
     },
 
     load: function() {
@@ -51,7 +47,7 @@ define([
       );
 
       // textures
-      this.texture = Loader.loadTexture(WebGL.gl, 'res/small_texture.png');
+      this.texture = Loader.loadTexture(WebGL.gl, 'res/small_texture_square.png');
 
       // render targets
       this.rtScene = WebGL.createRenderTarget(128, 128);
@@ -91,7 +87,7 @@ define([
       //this.renderIntoTarget(this.rtDiffuse3, this.rtDiffuse2.frametexture);
 
 
-      this.blurIntoTarget(this.rtBlur1, this.rtDiffuse1.frametexture);
+      this.blurIntoTarget(this.rtBlur1, this.rtScene.frametexture);
       this.blurIntoTarget(this.rtBlur2, this.rtBlur1.frametexture);
       this.blurIntoTarget(this.rtBlur3, this.rtBlur2.frametexture);
       this.blurIntoTarget(this.rtBlur4, this.rtBlur3.frametexture);
@@ -122,8 +118,8 @@ define([
       WebGL.gl.enable(WebGL.gl.BLEND);
 
       WebGL.useProgram(this.blendProgram);
-      WebGL.bindTexture(this.blendProgram.uniforms.u_texture2, this.rtBlur4.frametexture, 1);
-      Utils.drawRectangleTexture(this.blendProgram, vec2.fromValues(128+256, 128+256), vec2.fromValues(128, 128), this.texture, resolution);
+      WebGL.bindTexture(this.blendProgram.uniforms.u_texture2, this.rtBlur3.frametexture, 1);
+      Utils.drawRectangleTexture(this.blendProgram, vec2.fromValues(128+256, 128+256), vec2.fromValues(128, 128), this.rtScene.frametexture, resolution);
     },
 
 

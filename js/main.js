@@ -18,10 +18,11 @@ require([
 	'webgl',
 	'webgl-util',
 
-	'glowscene',
-	'bloomscene',
-	'downsamplescene',
-	'downsamplegaussianscene'
+	'scenes/glowscene',
+	'scenes/bloomscene',
+	'scenes/downsamplescene',
+	'scenes/downsamplegaussianscene',
+	'scenes/animationscene'
 ], function(
 	$,
 
@@ -31,11 +32,13 @@ require([
 	GlowScene,
 	BloomScene,
 	DownsampleScene,
-	DownsampleGaussianScene
+	DownsampleGaussianScene,
+	AnimationScene
 ) {
 
-	window.Main = {
-		running: true
+	var Main = window.Main = {
+		running: true,
+		lastTime: 0
 	};
 
 	function init() {
@@ -52,7 +55,8 @@ require([
 		// GlowScene.init(WebGL);
 		// BloomScene.init(WebGL);
 		// DownsampleScene.init(WebGL);
-		DownsampleGaussianScene.init(WebGL);
+		// DownsampleGaussianScene.init(WebGL);
+		AnimationScene.init(WebGL);
 
 		$(window).on('resize', resize);
 	}
@@ -66,21 +70,30 @@ require([
 		// GlowScene.resize();
 		// BloomScene.resize();
 		// DownsampleScene.resize();
-		DownsampleGaussianScene.resize();
+		// DownsampleGaussianScene.resize();
+		AnimationScene.resize();
 	}
 
 
-	function draw() {
-		// GlowScene.draw();
-		// BloomScene.draw();
-		// DownsampleScene.draw();
-		DownsampleGaussianScene.draw();
+	function draw(now) {
+		var time = {
+			elapsed: (now - Main.lastTime) / 1000.0,
+			total: now,
+			last: Main.lastTime
+		};
+		Main.lastTime = now;
+
+		// GlowScene.draw(time);
+		// BloomScene.draw(time);
+		// DownsampleScene.draw(time);
+		// DownsampleGaussianScene.draw(time);
+		AnimationScene.draw(time);
 
 		if (Main.running)
 			requestAnimationFrame(draw);
 	}
 
-
+	Main.lastTime = performance.now();
 
 	init();
 	resize();

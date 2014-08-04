@@ -164,8 +164,15 @@ define(['glmatrix'], function(glMatrix) {
 			WebGL.bindUniform(uniforms.u_scale, scale);
 			WebGL.bindUniform(uniforms.u_resolution, resolution || this.resolution);
 
-			if (texture)
-				WebGL.bindTexture(uniforms.u_texture, texture);
+			if (texture) {
+        if (texture.length) {
+          for (var i = 0; i < texture.length; i++) {
+            WebGL.bindTexture(uniforms['u_texture'+(i+1)], texture[i], i);
+          }
+        } else {
+				  WebGL.bindTexture(uniforms.u_texture, texture);
+        }
+      }
 
 			WebGL.drawVertices(rect.vertexCount);
 		},
@@ -193,6 +200,29 @@ define(['glmatrix'], function(glMatrix) {
 		},
 
 
+    drawTextureColor: function(program, position, scale, texture, color, resolution) {
+      var WebGL = this.WebGL;
+
+      if (!WebGL.useProgram(program) || (texture && texture.loaded === false)) {
+        return;
+      }
+
+      var rect = this._rectangle;
+      var attributes = program.attributes;
+      var uniforms = program.uniforms;
+
+      WebGL.bindAttribBuffer(rect.vertexPositions.buffer, attributes.a_position, rect.vertexPositions.size);
+      WebGL.bindAttribBuffer(rect.vertexTexcoords.buffer, attributes.a_texcoord, rect.vertexTexcoords.size);
+
+      WebGL.bindUniform(uniforms.u_position, position);
+      WebGL.bindUniform(uniforms.u_scale, scale);
+      WebGL.bindUniform(uniforms.u_resolution, resolution || this.resolution);
+
+      WebGL.bindUniform(uniforms.u_color, color);
+      WebGL.bindTexture(uniforms.u_texture, texture);
+
+      WebGL.drawVertices(rect.vertexCount);
+    },
 
 
 		fillArray: function(array, size, value) {
@@ -265,6 +295,56 @@ define(['glmatrix'], function(glMatrix) {
       }
 
       return row;
+    },
+
+
+    renderTextureIntoTarget: function(program, renderTarget, texture) {
+      var WebGL = this.WebGL;
+      var res = vec2.fromValues(renderTarget.width, renderTarget.height)
+      
+      WebGL.setRenderTarget(renderTarget);
+      WebGL.beginDraw([0.0, 0.0, 0.0, 1.0]);
+      Utils.drawRectangleTexture(program, vec2.fromValues(0, 0), res, texture, res);
+      WebGL.getTextureFromRenderTarget(renderTarget);
+    },
+
+
+    blurTextureIntoTarget: function(program, renderTarget, texture, kernel) {
+      var WebGL = this.WebGL;
+
+      WebGL.setRenderTarget(renderTarget);
+      WebGL.beginDraw([0.0, 0.0, 0.0, 1.0]);
+
+
+      var rect = Utils._rectangle;
+      var position = vec2.fromValues(0, 0);
+      var resolution = vec2.fromValues(renderTarget.width, renderTarget.height)
+      var scale = vec2.clone(resolution);
+      var textureResolution = resolution;
+
+      var kernelsize = Math.sqrt(kernel.length);
+      var kernel = Utils.fillArray(kernel, 121);
+
+      WebGL.useProgram(program);
+
+      // attributes
+      WebGL.bindAttribBuffer(rect.vertexPositions.buffer, program.attributes.a_position, rect.vertexPositions.size);
+      WebGL.bindAttribBuffer(rect.vertexTexcoords.buffer, program.attributes.a_texcoord, rect.vertexTexcoords.size);
+
+      // vert uniforms
+      WebGL.bindUniform(program.uniforms.u_position, position);
+      WebGL.bindUniform(program.uniforms.u_scale, scale);
+      WebGL.bindUniform(program.uniforms.u_resolution, resolution);
+
+      // frag uniforms
+      WebGL.bindTexture(program.uniforms.u_texture, texture);
+      WebGL.bindUniform(program.uniforms.u_textureresolution, textureResolution);
+      WebGL.bindUniform(program.uniforms.u_kernelsize, kernelsize, 'i');
+      WebGL.gl.uniform1fv(program.uniforms.u_kernel, new Float32Array(kernel));
+
+      WebGL.drawVertices(rect.vertexCount);
+
+      WebGL.getTextureFromRenderTarget(renderTarget);
     }
 	};
 
