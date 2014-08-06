@@ -3,14 +3,13 @@ precision mediump float;
 varying vec2 v_texcoord;
 
 uniform sampler2D u_texture;
-
-const int maxsize = 25;
-
 uniform vec2 u_textureresolution;
-uniform vec2 u_direction;
-uniform float u_kernel[maxsize];
-uniform int u_kernelsize;
 
+uniform vec2 u_direction;
+
+const int kernelsize = 5;
+const float kernel[5] = [0.024, 0.096, 0.144, 0.096, 0.024];
+const float 
 
 
 void main(void) {
@@ -20,24 +19,19 @@ void main(void) {
   float totalValue = 0.0;
 
   vec2 onePixel = vec2(1, 1) / u_textureresolution;
+  float mean = (kernelsize-1) / 2;
 
-  for (int i = 0; i < maxsize; i++) {
-    if (i > u_kernelsize) {
-      break;
-    }
-
-    float sample = float(i-((u_kernelsize-1) / 2));
+  for (int i = 0; i < kernelsize; i++) {
+    float sample = float(i-mean);
     vec4 col = texture2D(u_texture, texcoord + (onePixel * u_direction * vec2(sample, sample)));
 
-    float value = u_kernel[i];
+    float value = kernel[i];
     totalColor += col * value;
+    totalValue += value;
   }
 
+  totalColor /= totalValue;
+
   vec4 color = vec4((totalColor).rgb, 1.0);
-  // color = texture2D(u_texture, texcoord);
-  float v = (color.r + color.g + color.b) / 3.0;
-  gl_FragColor = vec4(v, v, v, 1.0);
-
-
-  // gl_FragColor = color;
+  gl_FragColor = color;
 }

@@ -62,7 +62,8 @@ define([
       this.rtBlur4 = WebGL.createRenderTarget(this.width / 8, this.height / 8);
 
       // kernel
-      this.kernel = [0.004, 0.016, 0.024, 0.016, 0.004, 0.016, 0.064, 0.096, 0.064, 0.016, 0.024, 0.096, 0.144, 0.096, 0.024, 0.016, 0.052, 0.096, 0.052, 0.016, 0.004, 0.016, 0.024, 0.016, 0.004];
+      // this.kernel = [0.004, 0.016, 0.024, 0.016, 0.004, 0.016, 0.064, 0.096, 0.064, 0.016, 0.024, 0.096, 0.144, 0.096, 0.024, 0.016, 0.052, 0.096, 0.052, 0.016, 0.004, 0.016, 0.024, 0.016, 0.004];
+      this.kernel = [0.024, 0.096, 0.144, 0.096, 0.024];
     },
 
     resize: function() {
@@ -83,7 +84,7 @@ define([
       Utils.blurTextureIntoTarget(this.kernelProgram, this.rtBlur1, this.rtScene.frametexture, this.kernel);
       Utils.blurTextureIntoTarget(this.kernelProgram, this.rtBlur2, this.rtBlur1.frametexture, this.kernel);
       Utils.blurTextureIntoTarget(this.kernelProgram, this.rtBlur3, this.rtBlur2.frametexture, this.kernel);
-      Utils.blurTextureIntoTarget(this.kernelProgram, this.rtBlur4, this.rtBlur3.frametexture, this.kernel);
+      // Utils.blurTextureIntoTarget(this.kernelProgram, this.rtBlur4, this.rtBlur3.frametexture, this.kernel);
 
 
       WebGL.setRenderTarget(null);
@@ -104,11 +105,11 @@ define([
       WebGL.setRenderTarget(this.rtScene);
       WebGL.beginDraw(blackColor);
 
+      Utils.drawTextureColor(this.textureProgram, vec2.fromValues(this.width / 2 - 100, this.height / 2 - 100), vec2.fromValues(100, 100), this.textureSquare, Color.getArray('silver', 1.0), resolution);
 
-      Utils.drawTextureColor(this.textureProgram, vec2.fromValues((this.width / 2) + (Math.sin(time.total * 0.005) * this.width / 4), 10), vec2.fromValues(100, 100), this.textureSquare, Color.getArray('silver', 1.0), resolution);
-      Utils.drawTextureColor(this.textureProgram, vec2.fromValues(this.width / 2, (this.width / 3) + (Math.sin(time.total * 0.003) * this.width / 4)), vec2.fromValues(100, 100), this.textureCircle, Color.getArray('purple', 1.0), resolution);
-
-      Utils.drawTextureColor(this.textureProgram, vec2.fromValues((this.width / 3) + (Math.sin(time.total * 0.003) * this.width / 3), (this.height / 2) + (Math.sin(time.total * 0.002) * this.height / 4)), vec2.fromValues(50, 50), this.textureCircle, Color.getArray('maroon', 1.0), resolution);
+      //Utils.drawTextureColor(this.textureProgram, vec2.fromValues((this.width / 2) + (Math.sin(time.total * 0.005) * this.width / 4), 10), vec2.fromValues(100, 100), this.textureSquare, Color.getArray('silver', 1.0), resolution);
+      //Utils.drawTextureColor(this.textureProgram, vec2.fromValues(this.width / 2, (this.width / 3) + (Math.sin(time.total * 0.003) * this.width / 4)), vec2.fromValues(100, 100), this.textureCircle, Color.getArray('purple', 1.0), resolution);
+      //Utils.drawTextureColor(this.textureProgram, vec2.fromValues((this.width / 3) + (Math.sin(time.total * 0.003) * this.width / 3), (this.height / 2) + (Math.sin(time.total * 0.002) * this.height / 4)), vec2.fromValues(50, 50), this.textureCircle, Color.getArray('maroon', 1.0), resolution);
 
 
       WebGL.getTextureFromRenderTarget(this.rtScene);
