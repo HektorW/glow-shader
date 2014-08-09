@@ -53,6 +53,11 @@ define([
         ['a_position', 'a_texcoord'],
         ['u_resolution', 'u_position', 'u_scale', 'u_texture', 'u_textureresolution', 'u_direction']
       );
+      this.preglowProgram = WebGL.loadProgram(
+        'shaders/texture.vert', 'shaders/preglow.frag',
+        ['a_position', 'a_texcoord'],
+        ['u_resolution', 'u_position', 'u_scale', 'u_texture']
+      );
 
       // textures
       this.textureSquare = Loader.loadTexture(WebGL.gl, 'res/texture_square.png');
@@ -62,10 +67,10 @@ define([
       // render targets
       this.rtScene = WebGL.createRenderTarget(this.width, this.height);
 
-      this.rtBlurSource = WebGL.createRenderTarget(this.width, this.height);
+      this.rtGlowSource = WebGL.createRenderTarget(this.width, this.height);
 
-      this.rtBlur1 = WebGL.createRenderTarget(this.width / 8, this.height / 8);
-      this.rtBlur2 = WebGL.createRenderTarget(this.width / 8, this.height / 8);
+      this.rtBlur1 = WebGL.createRenderTarget(this.width / 4, this.height / 4);
+      this.rtBlur2 = WebGL.createRenderTarget(this.width / 4, this.height / 4);
     },
 
     resize: function() {
@@ -74,17 +79,23 @@ define([
 
 
     draw: function(time) {
-      if (!Utils.isLoaded(this.textureProgram, this.texture, this.blendProgram, this.blurProgram)) {
+      if (!Utils.isLoaded(this.textureProgram, this.blendProgram, this.blurProgram, this.preglowProgram, this.textureCircle, this.textureSquare, this.textureCircleFilled)) {
         return;
       }
 
       var WebGL = this.WebGL;
       WebGL.setBlend();
 
+      // render diffuse scene
       this.drawScene(time, WebGL);
 
 
-      Utils.blurTextureIntoTarget(this.blurProgram, this.rtBlur1, this.rtScene.frametexture, vec2.fromValues(1.0, 0.0));
+      // render glow map
+      Utils.renderTextureIntoTarget(this.preglowProgram, this.rtGlowSource, this.rtScene.frametexture);
+
+
+      // blur using the glow map
+      Utils.blurTextureIntoTarget(this.blurProgram, this.rtBlur1, this.rtGlowSource.frametexture, vec2.fromValues(1.0, 0.0));
       Utils.blurTextureIntoTarget(this.blurProgram, this.rtBlur2, this.rtBlur1.frametexture, vec2.fromValues(0.0, 1.0));
 
 
@@ -96,7 +107,7 @@ define([
       WebGL.useProgram(this.blendProgram);
 
       WebGL.bindUniform(this.blendProgram.uniforms.u_a1, 1.0);
-      WebGL.bindUniform(this.blendProgram.uniforms.u_a2, 1.5);
+      WebGL.bindUniform(this.blendProgram.uniforms.u_a2, 2.5);
 
       Utils.drawRectangleTexture(this.blendProgram, vec2.fromValues(0, 0), vec2.fromValues(1, 1), [this.rtScene.frametexture, this.rtBlur2.frametexture], vec2.fromValues(1, 1));
     },
@@ -114,12 +125,11 @@ define([
       var halfheight = height / 2.0;
 
       Utils.drawTextureColor(this.textureProgram, vec2.fromValues((halfwidth) + (Math.sin(time.total * 0.002) * width / 4), 10), vec2.fromValues(width / 8, height / 8), this.textureCircle, Color.getArray('silver', 1.0), resolution);
-      Utils.drawTextureColor(this.textureProgram, vec2.fromValues(halfwidth - (width / 16), (width / 3) + (Math.sin(time.total * 0.003) * width / 4)), vec2.fromValues(width / 8, height / 8), this.textureCircleFilled, Color.getArray('purple', 1.0), resolution);
+      Utils.drawTextureColor(this.textureProgram, vec2.fromValues(halfwidth - (width / 16), (width / 3) + (Math.sin(time.total * 0.003) * width / 4)), vec2.fromValues(width / 8, height / 8), this.textureCircle, Color.getArray('purple', 1.0), resolution);
       Utils.drawTextureColor(this.textureProgram, vec2.fromValues((width / 2.5) + (Math.sin(time.total * 0.001) * width / 3), (height / 2.5) + (Math.sin(time.total * 0.002) * height / 3)), vec2.fromValues(width / 12, height / 12), this.textureCircle, Color.getArray('maroon', 1.0), resolution);
 
 
       WebGL.getTextureFromRenderTarget(this.rtScene);
-      
     }
   };
 
