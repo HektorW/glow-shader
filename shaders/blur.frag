@@ -7,31 +7,42 @@ uniform vec2 u_textureresolution;
 
 uniform vec2 u_direction;
 
-const int kernelsize = 5;
-const float kernel[5] = [0.024, 0.096, 0.144, 0.096, 0.024];
-const float 
+// const int c_kernelsize = 5;
+const int c_kernelsize = 3;
 
 
 void main(void) {
   vec2 texcoord = vec2(v_texcoord.s, -v_texcoord.t);
+  vec2 direction = u_direction / u_textureresolution;
 
-  vec4 totalColor = vec4(0.0, 0.0, 0.0, 0.0);
-  float totalValue = 0.0;
+  float c_weights[c_kernelsize];
+  // c_weights[0] = 0.2270270270;
+  // c_weights[1] = 0.1945945946;
+  // c_weights[2] = 0.1216216216;
+  // c_weights[3] = 0.0540540541;
+  // c_weights[4] = 0.0162162162;
+  c_weights[0] = 0.2270270270;
+  c_weights[1] = 0.3162162162;
+  c_weights[2] = 0.0702702703;
 
-  vec2 onePixel = vec2(1, 1) / u_textureresolution;
-  float mean = (kernelsize-1) / 2;
+  float c_offset[c_kernelsize];
+  // c_offset[0] = 0.0;
+  // c_offset[1] = 1.0;
+  // c_offset[2] = 2.0;
+  // c_offset[3] = 3.0;
+  // c_offset[4] = 4.0;
+  c_offset[0] = 0.0;
+  c_offset[1] = 1.3846153846;
+  c_offset[2] = 3.2307692308;
 
-  for (int i = 0; i < kernelsize; i++) {
-    float sample = float(i-mean);
-    vec4 col = texture2D(u_texture, texcoord + (onePixel * u_direction * vec2(sample, sample)));
 
-    float value = kernel[i];
-    totalColor += col * value;
-    totalValue += value;
+  vec4 color = texture2D(u_texture, texcoord) * c_weights[0];
+
+  for (int i = 1; i < c_kernelsize; i++) {
+    float sample = c_offset[i];
+    color += texture2D(u_texture, texcoord + (direction * vec2(sample, sample))) * c_weights[i];
+    color += texture2D(u_texture, texcoord - (direction * vec2(sample, sample))) * c_weights[i];
   }
 
-  totalColor /= totalValue;
-
-  vec4 color = vec4((totalColor).rgb, 1.0);
-  gl_FragColor = color;
+  gl_FragColor = vec4(color.rgb, 1.0);
 }
