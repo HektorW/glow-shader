@@ -72,6 +72,21 @@ require([
 		// DownsampleScene.resize();
 		// DownsampleGaussianScene.resize();
 		AnimationScene.resize();
+
+		$('body').css('background', 'black');
+
+		var canvas = WebGL.canvas;
+		var canvasHeight = WebGL.screenHeight;
+		var windowHeight = window.innerHeight;
+
+		var canvasMargin = Math.max(windowHeight - canvasHeight, 0) / 2;
+
+		$(canvas).css({
+			margin: 'auto',
+			display: 'block',
+			marginTop: canvasMargin
+		});
+
 	}
 
 
